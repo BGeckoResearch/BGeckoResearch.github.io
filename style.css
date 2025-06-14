@@ -1,0 +1,35 @@
+
+body {
+    background: linear-gradient(to bottom right, #001f3f, #003366);
+    color: #f0f0f0;
+    font-family: 'Source Serif Pro', serif;
+    padding: 2em;
+    margin: 0;
+}
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+h1 {
+    font-size: 3em;
+    color: #66ccff;
+    text-align: center;
+}
+h2 {
+    color: #99ccff;
+}
+.section {
+    margin-top: 2em;
+    padding: 1em;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid #66ccff;
+}
+footer {
+    margin-top: 4em;
+    text-align: center;
+    font-size: 0.8em;
+    color: #ccc;
+}
+a {
+    color: #66ccff;
+}
