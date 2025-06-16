@@ -10,6 +10,18 @@ body {
     max-width: 800px;
     margin: auto;
 }
+.top-bar h1{
+    background-color: #001f3f;
+    color: #66ccff;
+    padding: 1em 2em;
+    text-align: center;
+    font-size: 2em;
+    font-family: 'Source Serif Pro', serif;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.top-bar h1{
+    margin: 0;
+}
 h1 {
     font-size: 3em;
     color: #66ccff;
