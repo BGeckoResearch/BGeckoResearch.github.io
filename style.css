@@ -1,6 +1,6 @@
 
 body {
-    background: linear-gradient(to bottom right, #2B2829, #66B2FF);
+    background: linear-gradient(to bottom right, #001f3f, #66B2FF);
     color: #f0f0f0;
     font-family: 'Source Serif Pro', serif;
     padding: 2em;
@@ -22,7 +22,7 @@ h2 {
     margin-top: 2em;
     padding: 1em;
     background-color: rgba(255, 255, 255, 0.05);
-    border-left: 4px solid #66ccff;
+    border-left: 4px solid  #2B2829;
 }
 .section u1 {
     margin-left: 1.5em;
