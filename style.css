@@ -69,12 +69,6 @@ body > *:not(#particles-js) {
     animation-delay: 0.5s;
 }
 
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}
-
 h1 {
     font-size: 3em;
     color: #0000ff;
