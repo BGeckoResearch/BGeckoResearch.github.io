@@ -4,10 +4,6 @@ body {
     padding: 2em;
     margin: 0;
 }
-#main-content, #your-content-wrapper {
-    position: relative;
-    z-index: 1;
-}
 #particles-js {
     position: fixed;
     width: 100%;
@@ -16,6 +12,10 @@ body {
     left: 0;
     z-index: 0;
     background-color: #66B2FF;
+}
+body > *:not(#particles-js) {
+    position: relative;
+    z-index: 1;
 }
 .container {
     max-width: 800px;
