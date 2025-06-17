@@ -65,8 +65,6 @@ body > *:not(#particles-js) {
     color: #002855;
     margin-bottom: 2rem;
     opacity: 0;
-    animation: fadeIn 1s ease forwards;
-    animation-delay: 0.5s;
 }
 
 h1 {
