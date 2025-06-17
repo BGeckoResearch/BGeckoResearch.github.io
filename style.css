@@ -52,6 +52,7 @@ body > *:not(#particles-js) {
     text-align: center;
     font-size: 2em;
     font-family: 'Source Serif Pro', serif;
+    border-radius: 16px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 .top-bar h1{
