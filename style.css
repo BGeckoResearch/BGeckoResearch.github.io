@@ -35,16 +35,16 @@ body > *:not(#particles-js) {
 }
 h1 {
     font-size: 3em;
-    color: #66ccff;
+    color: #0000ff;
     text-align: center;
 }
 h2 {
-    color: #99ccff;
+    color: #0000ff;
 }
 .section {
     margin-top: 2em;
     padding: 1em;
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.45);
     border-left: 4px solid  #66ccff;
 }
 .section u1 {
