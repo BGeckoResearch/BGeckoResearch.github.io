@@ -10,9 +10,15 @@
             onload="renderMathInElement(document.body);"></script>
     <script defer src="js/particles.min.js"></script>
     <script defer>
-        particlesJS.load('particles-js', 'js/particles.json', function() {
-            console.log('callback - particles.js config loaded');
-        });
+        // particles-init.js
+        particlesJS.load(
+            'particles-js',        // ID of the div
+            'js/particles.json',   // Path to your JSON config file
+            function () {
+                console.log('particles.js config loaded');
+            }
+        );
+
     </script>
 
 </head>
