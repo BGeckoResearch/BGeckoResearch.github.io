@@ -4,6 +4,10 @@ body {
     padding: 2em;
     margin: 0;
 }
+#main-content, #your-content-wrapper {
+    position: relative;
+    z-index: 1;
+}
 #particles-js {
     position: fixed;
     width: 100%;
