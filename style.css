@@ -13,6 +13,30 @@ body {
     z-index: 0;
     background-color: #66B2FF;
 }
+.lab-intro {
+    font-size: 1.2em;
+    font-style: italic;
+    color: #002855;
+    text-align: center;
+    max-width: 800px;
+    margin: 1.5em auto;
+    padding: 1em 2em;
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+.center-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+
 body > *:not(#particles-js) {
     position: relative;
     z-index: 1;
