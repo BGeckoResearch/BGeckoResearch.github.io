@@ -102,8 +102,12 @@ h2 {
 
 .footer-logo {
     /* size the logo to taste */
+    display: block;   /* make margin:auto center horizontally */
+    margin: 2rem auto 1rem; /* 2rem above, 1rem below, auto left/right */
     width: 4rem;     /* e.g. 64px wide */
     height: auto;
+    position: relative;
+    z-index: 1;
     
     /* optional: a subtle drop shadow for depth */
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
