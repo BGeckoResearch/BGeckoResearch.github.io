@@ -132,7 +132,7 @@ a {
 #clocks-container {
     display: flex;
     justify-content: space-around;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: nowrap;            /* force one line */
     overflow-x: auto;             /* scroll if too many */
     max-width: 100%;
@@ -176,7 +176,7 @@ a {
     width: 100vw;           /* then span the full viewport width */
     box-sizing: border-box; /* include padding in that width */
     background-color: #2F2C2D;
-    padding: 16px 0;
+    padding: 4px 0 80px;
     overflow-x: auto;       /* allow horizontal scroll if needed */
 }
 
@@ -185,22 +185,7 @@ body {
     overflow-x: hidden;
 }
 
-/* ── Force the clock-bar to bleed full-width ── */
-.bottom-clock-bar {
-    position: relative;     /* so we can shift it */
-    left: 50%;              /* start in the middle */
-    margin-left: -50vw;     /* pull back by half the viewport */
-    width: 100vw;           /* then span the full viewport width */
-    box-sizing: border-box; /* include padding in that width */
-    background-color: #2F2C2D;
-    padding: 16px 0;
-    overflow-x: auto;       /* allow horizontal scroll if needed */
-}
 
-/* if you notice a horizontal scrollbar on mobile, you can hide it: */
-body {
-    overflow-x: hidden;
-}
 
 
 
