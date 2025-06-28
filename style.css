@@ -176,7 +176,7 @@ a {
     width: 100vw;           /* then span the full viewport width */
     box-sizing: border-box; /* include padding in that width */
     background-color: #2F2C2D;
-    padding: 4px 0 80px;
+    padding: 60px 0 80px;
     overflow-x: auto;       /* allow horizontal scroll if needed */
 }
 
