@@ -121,3 +121,50 @@ footer {
 a {
     color: #66ccff;
 }
+/* ── Bottom Clocks Bar ── */
+.bottom-clock-bar {
+    background-color: #2F2C2D;    /* same as .top-bar h1 */
+    padding: 16px 0;
+    margin-top: 2em;
+}
+
+/* arrange all clocks in one row */
+#clocks-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: nowrap;            /* force one line */
+    overflow-x: auto;             /* scroll if too many */
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 1em;
+}
+
+/* individual clock “cards” */
+.test-clock {
+    flex: 0 0 auto;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    margin: 0 8px;
+}
+
+.test-clock .time-title,
+.test-clock .digital {
+    color: #00BFFF;               /* keep your signature blue */
+    font-family: 'Courier New', monospace;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+/* shrink the canvas if needed */
+.test-clock canvas {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 50%;
+    background: #fff;
+}
+
