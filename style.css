@@ -184,6 +184,25 @@ a {
 body {
     overflow-x: hidden;
 }
+/* ── Pin the clocks bar flush to the bottom of the viewport ── */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.bottom-clock-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    padding: 60px 0 80px;   /* keep your 60px “ceiling” and 80px “floor” */
+    background-color: #2F2C2D;
+    box-sizing: border-box;
+    z-index: 1000;          /* make sure it sits above all content */
+}
+
 
 
 
