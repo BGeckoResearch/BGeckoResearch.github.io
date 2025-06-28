@@ -168,3 +168,21 @@ a {
     background: #fff;
 }
 
+/* ── Force the clock-bar to bleed full-width ── */
+.bottom-clock-bar {
+    position: relative;     /* so we can shift it */
+    left: 50%;              /* start in the middle */
+    margin-left: -50vw;     /* pull back by half the viewport */
+    width: 100vw;           /* then span the full viewport width */
+    box-sizing: border-box; /* include padding in that width */
+    background-color: #2F2C2D;
+    padding: 16px 0;
+    overflow-x: auto;       /* allow horizontal scroll if needed */
+}
+
+/* if you notice a horizontal scrollbar on mobile, you can hide it: */
+body {
+    overflow-x: hidden;
+}
+
+
