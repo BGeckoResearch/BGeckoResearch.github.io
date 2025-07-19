@@ -56,6 +56,33 @@
                 </ul>
             </div>
 
+            <div class="section" id="oeis-explorer">
+                <h2>OEIS Sequence Explorer</h2>
+                <p>
+                    Query integer sequences (by keyword or ID like <code>A000045</code>).
+                    Results load below. Data courtesy of
+                    <a href="https://oeis.org" target="_blank" rel="noopener">OEIS®</a> (CC BY-NC 3.0).
+                </p>
+                
+                <form id="oeis-form" onsubmit="event.preventDefault(); loadOEIS();">
+                    <input
+                        type="text"
+                        id="oeis-input"
+                        placeholder="e.g. A000045, primes, partition numbers"
+                        autocomplete="off"
+                        aria-label="OEIS search"
+                    >
+                    <button type="submit">Search</button>
+                    <button type="button" id="oeis-clear" onclick="clearOEIS()">Clear</button>
+                </form>
+                
+                <div id="oeis-feedback" aria-live="polite"></div>
+                <div id="oeis-frame-wrapper">
+                    <iframe id="oeis-frame" title="OEIS Result" loading="lazy"></iframe>
+                </div>
+            </div>
+
+
             <div class="section">
                 <h2>Recent Notes</h2>
                 <p>Coming soon: OSF Publication of Multimodal Distribution Theory</p>
