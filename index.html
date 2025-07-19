@@ -233,5 +233,44 @@
             setInterval(updateClocks, 1000);
         });
     </script>
+
+    <script>
+        // --- OEIS Explorer Logic ---
+        function loadOEIS() {
+            const inputEl = document.getElementById('oeis-input');
+            const feedback = document.getElementById('oeis-feedback');
+            const frame = document.getElementById('oeis-frame');
+            const raw = inputEl.value.trim();
+            
+            if (!raw) {
+                feedback.textContent = "Enter a keyword or sequence ID.";
+                return;
+            }
+            
+            // Recognize canonical OEIS ID: A + 6 digits
+            const isID = /^A\d{6}$/i.test(raw);
+            const query = isID ? raw.toUpperCase() : encodeURIComponent(raw);
+            
+            // Build URL: direct sequence page if ID, else search results page.
+            const url = isID ? `https://oeis.org/${query}` : `https://oeis.org/search?q=${query}`;
+            
+            feedback.textContent = "Loading...";
+            frame.src = url;
+            
+            // Give minimal UX signal when load completes
+            frame.onload = () => {
+                feedback.textContent = isID
+                    ? `Loaded sequence ${query}.`
+                    : `Search results for “${raw}”.`;
+            };
+        }
+        
+        function clearOEIS() {
+            document.getElementById('oeis-input').value = "";
+            document.getElementById('oeis-frame').src = "about:blank";
+            document.getElementById('oeis-feedback').textContent = "";
+        }
+    </script>
+    
 </body>
 </html>
