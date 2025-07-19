@@ -63,6 +63,40 @@
                 </div>
             </div>
 
+            <div class="section" id="doe-tool">
+                <h2>Design of Experiments (DOE) Builder</h2>
+                <p style="margin-top:-0.4rem;">
+                    Generate full or fractional factorial designs. Phase 1 supports 2-level full factorial and standard 2<sup>k</sup> fractions (Res III–V templates).
+                </p>
+                
+                <form id="doe-config" onsubmit="event.preventDefault(); buildDOE();">
+                    <label>Factors (comma-separated):
+                        <input type="text" id="doe-factors" placeholder="A,B,C,D" value="A,B,C">
+                    </label>
+                    <label>Levels per factor:
+                        <input type="text" id="doe-levels" placeholder="2,2,2">
+                    </label>
+                    <label>Design Type:
+                        <select id="doe-type">
+                            <option value="full">Full Factorial</option>
+                            <option value="frac-1-2">2^k Half Fraction (1/2)</option>
+                            <option value="frac-1-4">2^k Quarter Fraction (1/4)</option>
+                            <option value="frac-1-8">2^k Eighth Fraction (1/8)</option>
+                        </select>
+                    </label>
+                    <label style="display:inline-block;">
+                        Randomize:
+                        <input type="checkbox" id="doe-rand" checked>
+                    </label>
+                    <button type="submit">Generate</button>
+                    <button type="button" onclick="loadDOEExample()">Example</button>
+                </form>
+                
+                <div id="doe-meta" style="margin-top:0.8rem;font-size:0.85rem;"></div>
+                <div id="doe-results" style="margin-top:1rem; overflow-x:auto;"></div>
+            </div>
+
+
 
             <div class="section">
                 <h2>Recent Notes</h2>
@@ -252,6 +286,8 @@
             document.getElementById('oeis-feedback').textContent = "";
         }
     </script>
+
+
     
 </body>
 </html>
