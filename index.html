@@ -286,6 +286,222 @@
             document.getElementById('oeis-feedback').textContent = "";
         }
     </script>
+    
+    <script>
+        
+        /* ===== DOE Tool Phase 1 ===== */
+        function loadDOEExample() {
+            document.getElementById('doe-factors').value = "A,B,C,D";
+            document.getElementById('doe-levels').value = "2,2,2,2";
+            document.getElementById('doe-type').value = "frac-1-2";
+        }
+        
+        function buildDOE() {
+            const fStr = document.getElementById('doe-factors').value.trim();
+            const lStr = document.getElementById('doe-levels').value.trim();
+            const type = document.getElementById('doe-type').value;
+            const randomize = document.getElementById('doe-rand').checked;
+            
+            if (!fStr) return;
+            const factors = fStr.split(',').map(s=>s.trim()).filter(Boolean);
+            const levelsSpec = lStr ? lStr.split(',').map(s=>parseInt(s.trim(),10)) : [];
+            if (levelsSpec.length && levelsSpec.length !== factors.length) {
+                alert("Levels list length must match number of factors.");
+                return;
+            }
+            
+            // For now require all 2-level for fractional designs
+            if (type.startsWith('frac')) {
+                if (!levelsSpec.length) {
+                    for (let i=0;i<factors.length;i++) levelsSpec.push(2);
+                }
+                
+                if (!levelsSpec.every(v=>v===2)) {
+                    alert("Fractional design currently limited to 2-level factors only.");
+                    return;
+                }
+            } else {
+                if (!levelsSpec.length) {
+                    for (let i=0;i<factors.length;i++) levelsSpec.push(2);
+                }
+            }
+            
+            // Generate design
+            
+            let design;
+            if (type === 'full') {
+                design = fullFactorial(levelsSpec);
+            } else {
+                design = fractionalFactorial(factors.length, type);
+            }
+            
+            // If full factorial with non-binary levels: expand natural values
+            const coded = design.map(row => row.slice());
+            const natural = mapToNatural(design, levelsSpec);
+            
+            // Randomize order if requested
+            let idx = design.map((_,i)=>i);
+            if (randomize) {
+                for (let i=idx.length-1;i>0;i--) {
+                    const r = Math.floor(Math.random()*(i+1));
+                    [idx[i],idx[r]] = [idx[r],idx[i]];
+                }
+            }
+            
+            const permCoded = idx.map(i=>coded[i]);
+            const permNatural = idx.map(i=>natural[i]);
+            
+            // Build table
+            const out = [];
+            out.push('<table><thead><tr><th>Run</th>');
+            factors.forEach(f=> out.push(`<th>${f} (coded)</th>`));
+            factors.forEach(f=> out.push(`<th>${f} (nat)</th>`));
+            out.push('</tr></thead><tbody>');
+            for (let r=0;r<permCoded.length;r++) {
+                out.push(`<tr><td>${r+1}</td>`);
+                permCoded[r].forEach(v=> out.push(`<td>${v}</td>`));
+                permNatural[r].forEach(v=> out.push(`<td>${v}</td>`));
+                out.push('</tr>');
+            }
+            out.push('</tbody></table>');
+            
+            // Metadata + aliasing (if fractional)
+            let meta = '';
+            let aliasHtml = '';
+            if (type === 'full') {
+                meta = `${permCoded.length} runs (Full Factorial).`;
+            } else {
+                const info = fractionalInfo(factors.length, type);
+                meta = `${permCoded.length} runs of ${Math.pow(2,factors.length)} (Fraction ${info.fraction}, Resolution ${info.resolution}).`;
+                aliasHtml = aliasReport(info.generators, factors);
+            }
+            
+            document.getElementById('doe-meta').innerHTML = meta;
+            document.getElementById('doe-results').innerHTML = out.join('') + (aliasHtml ? `<div class="alias-box">${aliasHtml}</div>` : '');
+        }
+        
+        /* --- Full Factorial Generator --- */
+        function fullFactorial(levels) {
+            // Produce cartesian product in coded form:
+            // For 2-level => -1,+1; for k-level => 0..k-1 coded later (centered)
+            const ranges = levels.map(L=> Array.from({length:L},(_,i)=> L===2 ? (i===0?-1:1) : i));
+            let prod = [[]];
+            for (const arr of ranges) {
+                const next = [];
+                for (const base of prod) {
+                    for (const v of arr) next.push(base.concat([v]));
+                }
+                
+                prod = next;
+            }
+            
+            // If non-binary levels: we keep initial coded placeholders (0..k-1) (will recode to centered later)
+            return prod;
+        }
+        
+        function mapToNatural(design, levels) {
+            // For 2-level: map -1→Low, +1→High (we can just output -1/+1 again or supply 0/1)
+            // For >2-level: natural = level index (for now). Future: user-specified actual numeric settings.
+            return design.map(row => row.map((v,i)=>{
+                if (levels[i]===2) return v; // natural identical for now
+                return v; // placeholder
+            }));
+        }
+        
+        /* --- Fractional Factorial (2-level only) --- */
+        function fractionalFactorial(k, type) {
+            // Start with base factors (k)
+            // We will build full 2^(k - p) and then derive dependent columns for generators.
+            const fracMap = {
+                'frac-1-2': {p:1},
+                'frac-1-4': {p:2},
+                'frac-1-8': {p:3}
+            };
+            const {p} = fracMap[type];
+            const baseCount = k - p;
+            if (baseCount < 2) throw new Error("Too few base factors for this fraction.");
+            // Build full design on baseCount factors
+            const base = fullFactorial(new Array(baseCount).fill(2));
+            // Extract base coded columns
+            // All base are 2-level: rows are arrays of length baseCount with -1/+1
+            // Now derive remaining factors via generators chosen heuristically for Res V when possible
+            // Use standard generator assignments table (simplified)
+            const gens = chooseGenerators(k, p);
+            const design = [];
+            for (const row of base) {
+                // row corresponds to first baseCount factors
+                const fullRow = row.slice();
+                // Derive each generated factor = product (multiplication) of specified parent columns
+                gens.forEach(g => {
+                    let val = 1;
+                    g.parents.forEach(idx => { val *= row[idx]; });
+                    fullRow.push(val);
+                });
+                
+                design.push(fullRow);
+            }
+            return design;
+        }
+        
+        function chooseGenerators(k, p) {
+            // Return array of {symbol, parents:[indices of base factors]}
+            // Base factors indices: 0 .. (k-p-1)
+            // Heuristic sets for up to k=6
+            // Example for k=5, p=2 (1/4 fraction): base=3 (A,B,C), gens: D=AB, E=AC (Res IV)
+            const base = k - p;
+            const gens = [];
+            if (p===1) { // 1/2
+                gens.push({symbol: base, parents:[0,1,2].filter(i=>i<base)}); // use first three base factors
+            } else if (p===2) {
+                if (k===5) { // base=3
+                    gens.push({symbol: base, parents:[0,1]});      // D = AB
+                    gens.push({symbol: base+1, parents:[0,2]});    // E = AC
+                } else {
+                    // Generic: chain
+                    gens.push({symbol: base, parents:[0,1]});
+                    gens.push({symbol: base+1, parents:[1,2]});
+                }
+            } else if (p===3) {
+                // base = k-3
+                gens.push({symbol: base, parents:[0,1]});
+                gens.push({symbol: base+1, parents:[0,2]});
+                gens.push({symbol: base+2, parents:[1,2]});
+            }
+            return gens;
+        }
+        
+        function fractionalInfo(k, type) {
+            const fracMap = {
+                'frac-1-2': {fraction:'1/2', p:1},
+                'frac-1-4': {fraction:'1/4', p:2},
+                'frac-1-8': {fraction:'1/8', p:3}
+            };
+            
+            const {fraction,p} = fracMap[type];
+            const base = k - p;
+            // Crude resolution heuristic
+            let resolution = (p===1 && k>=4) ? 'IV' : (p===2 && k>=5) ? 'IV' : 'III';
+            if (k>=5 && p===1) resolution='V';
+            const generators = chooseGenerators(k,p);
+            return {fraction, p, base, resolution, generators};
+        }
+        
+        function aliasReport(generators, factors) {
+            if (!generators.length) return '';
+            // Show simple defining relations: I = product(base parents)*GenSymbol
+            // Map factor index to label
+            const labels = factors.map((f,i)=> f || ('F'+(i+1)));
+            const rel = generators.map(g => {
+                const parents = g.parents.map(i=> labels[i]).join('');
+                const gLabel = labels[g.symbol] || ('F'+(g.symbol+1));
+                return `I = ${parents}${gLabel}`;
+            });
+            
+            return `<strong>Defining Relations:</strong> ${rel.join(', ')}<br>
+            <em>Note:</em> Detailed alias chains coming in Phase 2.`;
+        }
+</script>
+
 
 
     
