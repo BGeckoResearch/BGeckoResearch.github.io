@@ -273,6 +273,56 @@ body {
 
 
 
+/* ── PDF Manager Styles ── */
+#pdf-manager h2 {
+    color: #0000ff;
+    margin-bottom: 1rem;
+}
+#pdfUploadForm {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+#pdfUploadForm input[type="file"] {
+    padding: 8px;
+    background: #f5faff;
+    border: 1px solid #66ccff;
+    border-radius: 8px;
+    font-family: 'Source Serif Pro', serif;
+}
+#pdfUploadForm button {
+    background: #002855;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+#pdfUploadForm button:hover {
+    background: #005ea5;
+}
+#pdfTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255,255,255,0.65);
+    border-radius: 12px;
+    overflow: hidden;
+}
+#pdfTable th,
+#pdfTable td {
+    border: 1px solid #cfe7ff;
+    padding: 8px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+#pdfTable th {
+    background: #002855;
+    color: #fff;
+}
+
+
 
 
 
