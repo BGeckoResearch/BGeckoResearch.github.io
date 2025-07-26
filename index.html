@@ -102,6 +102,58 @@
                 <h2>Recent Notes</h2>
                 <p>Coming soon: OSF Publication of Multimodal Distribution Theory</p>
             </div>
+            
+            <!-- ── PDF Manager Section ── -->
+            <div class="section" id="pdf-manager">
+                <h2>Research PDFs</h2>
+                <form id="pdfUploadForm">
+                    <input type="file" id="pdfUpload" accept=".pdf" />
+                    <button type="submit">Upload PDF</button>
+                </form>
+                <table id="pdfTable">
+                    <thead>
+                        <tr><th>Filename</th><th>Download</th></tr>
+                    </thead>
+                    <tbody>
+                        <!-- rows appended here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <script>
+                const form = document.getElementById('pdfUploadForm');
+                const input = document.getElementById('pdfUpload');
+                const tableBody = document.querySelector('#pdfTable tbody');
+                
+                form.addEventListener('submit', e => {
+                    e.preventDefault();
+                    const file = input.files[0];
+                    if (!file) return;
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = file.name;
+                    const linkCell = document.createElement('td');
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(file);
+                    a.download = file.name;
+                    a.textContent = 'Download';
+                    linkCell.appendChild(a);
+                    row.appendChild(nameCell);
+                    row.appendChild(linkCell);
+                    tableBody.appendChild(row);
+                    form.reset();
+                });
+            </script>
+
+
+
+
+
+
+
+
+
+            
 
             <img src="img/gecko_icon.png" alt="Gecko logo" class="footer-logo">
 
