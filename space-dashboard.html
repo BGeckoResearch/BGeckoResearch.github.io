@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Space Dashboard</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.112/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.112/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+      font-family: sans-serif;
+    }
+    #toolbar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 5;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      border-radius: 8px;
+      color: white;
+    }
+    input[type="text"] {
+      padding: 6px;
+      border-radius: 4px;
+      border: none;
+      width: 140px;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <div id="toolbar">
+    <label for="norad">Search NORAD ID:</label>
+    <input type="text" id="norad" placeholder="e.g. 25544" />
+    <button onclick="trackSatellite()">Track</button>
+  </div>
+
+  <script src="https://unpkg.com/satellite.js@5.0.1/dist/satellite.min.js"></script>
+  <script>
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      shouldAnimate: true,
+      timeline: true,
+      animation: true,
+      baseLayerPicker: false,
+    });
+
+    const satCatalog = {};
+    let currentEntity = null;
+
+    async function fetchTLE(noradId) {
+      const url = `https://celestrak.org/NORAD/elements/gp.php?CATNR=${noradId}&FORMAT=TLE`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const lines = text.trim().split("\n");
+      if (lines.length < 2) throw "TLE not found.";
+      return [lines[0], lines[1]];
+    }
+
+    async function trackSatellite() {
+      const noradId = document.getElementById("norad").value.trim();
+      if (!noradId) return alert("Enter a NORAD ID.");
+
+      try {
+        const [tle1, tle2] = await fetchTLE(noradId);
+        const satrec = satellite.twoline2satrec(tle1, tle2);
+        if (currentEntity) viewer.entities.remove(currentEntity);
+
+        currentEntity = viewer.entities.add({
+          name: "Satellite " + noradId,
+          position: new Cesium.CallbackProperty(function(time) {
+            const jsDate = Cesium.JulianDate.toDate(time);
+            const gmst = satellite.gstime(jsDate);
+            const pos = satellite.propagate(satrec, jsDate);
+            const eci = pos.position;
+            if (!eci) return Cesium.Cartesian3.ZERO;
+            const coords = satellite.eciToGeodetic(eci, gmst);
+            const lat = Cesium.Math.toDegrees(coords.latitude);
+            const lon = Cesium.Math.toDegrees(coords.longitude);
+            const alt = coords.height * 1000;
+            return Cesium.Cartesian3.fromDegrees(lon, lat, alt);
+          }, false),
+          point: { pixelSize: 10, color: Cesium.Color.CYAN },
+          description: `NORAD ID: ${noradId}<br/>TLE:<br/>${tle1}<br/>${tle2}`
+        });
+
+        viewer.trackedEntity = currentEntity;
+      } catch (err) {
+        alert("Could not load satellite: " + err);
+      }
+    }
+  </script>
+</body>
+</html>
