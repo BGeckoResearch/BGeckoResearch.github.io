@@ -102,29 +102,79 @@
                 <div id="doe-meta" style="margin-top:0.8rem;font-size:0.85rem;"></div>
                 <div id="doe-results" style="margin-top:1rem; overflow-x:auto;"></div>
             </div>
-
             
-           <!-- ── PDF Manager Section (PUBLIC_DATA-backed) ── -->
+            
+            
+            
+            
+            <!-- ── File Manager Section (PUBLIC_DATA-backed) ── -->
             <div class="section" id="pdf-manager">
-                <h2>Research PDFs</h2>
+                <h2>Research Files</h2>
                 <p style="margin-top:-0.4rem; font-size:0.9rem;">
                     Files served from the <code>PUBLIC_DATA</code> repository.
                 </p>
+                
+                <!-- Upload (only you, via GitHub token in your browser) -->
+                <form id="vaultUploadForm" style="margin-bottom:0.75rem;">
+                    <input
+                        type="file"
+                        id="vaultUpload"
+                        accept=".pdf,.zip,.jpg,.jpeg,.png"
+                        />
+                    
+                    
+                    <button type="submit">Upload File to PUBLIC_DATA</button>
+                </form>
+                
+                
                 <table id="pdfTable">
                     <thead>
                         <tr><th>Filename</th><th>Download</th></tr>
                     </thead>
+                    
                     <tbody>
-                        
                         <!-- rows appended here -->
                     </tbody>
                 </table>
             </div>
             
             <script>
-                async function loadVaultPdfs() {
+                
+                // ---------- CONFIG ----------
+                const PUBLIC_OWNER  = 'BGeckoResearch';
+                const PUBLIC_REPO   = 'PUBLIC_DATA';
+                const PUBLIC_BRANCH = 'main'; // change if repo uses a different default branch
+
+                // ---------- TOKEN MANAGEMENT ----------
+                let githubToken = null;
+                
+                function getGithubToken() {
+                    if (githubToken) return githubToken;
+
+                    const saved = localStorage.getItem('bgecko_public_data_token');
+                    if (saved) {
+                        githubToken = saved;
+                        return githubToken;
+                    }
+
+                    const token = window.prompt(
+                        'Enter your GitHub access token with write access to PUBLIC_DATA.\n' +
+                        '(This is stored only in this browser; never share it.)'
+                    );
+                    
+                    if (!token) return null;
+
+                    githubToken = token.trim();
+                    // Comment this out if you do NOT want to persist it
+                    localStorage.setItem('bgecko_public_data_token', githubToken);
+                    return githubToken;
+                }
+
+                // ---------- LIST FILES FROM PUBLIC_DATA ----------
+                async function loadVaultFiles() {
                     const tableBody = document.querySelector('#pdfTable tbody');
-                    // Helper to show a single-row message
+                    tableBody.innerHTML = '';
+                    
                     function showMessage(msg) {
                         const row = document.createElement('tr');
                         const cell = document.createElement('td');
@@ -133,42 +183,57 @@
                         row.appendChild(cell);
                         tableBody.appendChild(row);
                     }
-                    
+
                     try {
-                        // 1) Call GitHub API for PUBLIC_DATA repo root
                         const res = await fetch(
-                            'https://api.github.com/repos/BGeckoResearch/PUBLIC_DATA/contents/'
+                            'https://api.github.com/repos/' +
+                            PUBLIC_OWNER + '/' + PUBLIC_REPO + '/contents/'
                         );
-                        
+
                         if (!res.ok) {
-                            showMessage('Could not load PDFs from PUBLIC_DATA.');
+                            showMessage('Could not load files from PUBLIC_DATA.');
                             console.error('GitHub API error:', res.status, await res.text());
                             return;
                         }
+
                         const items = await res.json();
+
+                        // Allowed extensions: pdf, zip, jpg, jpeg, png
+                        const allowed = items.filter(item => {
+                            if (item.type !== 'file') return false;
+                            const n = item.name.toLowerCase();
+                            return (
+                                n.endsWith('.pdf') ||
+                                n.endsWith('.zip') ||
+                                n.endsWith('.jpg') ||
+                                n.endsWith('.jpeg') ||
+                                n.endsWith('.png')
+                            
+                            );
                         
-                        // 2) Filter for .pdf files (case-insensitive)
-                        const pdfs = items.filter(item =>
-                            item.type === 'file' &&
-                            item.name.toLowerCase().endsWith('.pdf')
-                                                 );
-                        
-                        if (!pdfs.length) {
-                            showMessage('No PDFs found in PUBLIC_DATA yet.');
+                        });
+
+                        if (!allowed.length) {
+                            showMessage('No files found in PUBLIC_DATA yet.');
                             return;
                         }
                         
-                        // 3) Populate table
-                        pdfs.forEach(file => {
+                        allowed.forEach(file => {
+                            
                             const row = document.createElement('tr');
+
+                            // MY STOPPING POINT (ANALYSIS-WISE)
+                            
                             const nameCell = document.createElement('td');
                             nameCell.textContent = file.name;
+
                             const linkCell = document.createElement('td');
                             const a = document.createElement('a');
                             a.href = file.download_url;   // direct download URL
                             a.textContent = 'Download';
                             a.target = '_blank';
                             a.rel = 'noopener';
+
                             linkCell.appendChild(a);
                             row.appendChild(nameCell);
                             row.appendChild(linkCell);
@@ -176,14 +241,109 @@
                         });
                     } catch (err) {
                         console.error(err);
-                        showMessage('Error loading PDFs from PUBLIC_DATA.');
+                        showMessage('Error loading files from PUBLIC_DATA.');
                     }
                 }
-                
-                document.addEventListener('DOMContentLoaded', loadVaultPdfs);
+
+                // ---------- UPLOAD A SINGLE FILE INTO PUBLIC_DATA ----------
+                async function uploadFileToPublicData(file) {
+                    const token = getGithubToken();
+                    if (!token) {
+                        alert('GitHub token is required to upload.');
+                        return;
+                    }
+
+                    const nameLower = file.name.toLowerCase();
+                    if (
+                        !nameLower.endsWith('.pdf') &&
+                        !nameLower.endsWith('.zip') &&
+                        !nameLower.endsWith('.jpg') &&
+                        !nameLower.endsWith('.jpeg') &&
+                        !nameLower.endsWith('.png')
+                    ) {
+                        alert('Allowed types: .pdf, .zip, .jpg, .jpeg, .png');
+                        return;
+                    }
+
+                    const rawPath = file.name; // simple: just the filename
+                    const urlPath = encodeURIComponent(rawPath).replace(/%2F/g, '/');
+
+                    // Check if it already exists (for safe overwrite prompt)
+                    const checkRes = await fetch(
+                        `https://api.github.com/repos/${PUBLIC_OWNER}/${PUBLIC_REPO}/contents/${urlPath}`
+                    );
+
+                    let existingSha = null;
+                    if (checkRes.ok) {
+                        const overwrite = window.confirm(
+                            `${rawPath} already exists in PUBLIC_DATA.\n` +
+                            'Do you want to overwrite it?'
+                        );
+                        if (!overwrite) return;
+                        const existing = await checkRes.json();
+                        existingSha = existing.sha;
+                    }
+
+                    // Read file & base64 encode
+                    const buffer = await file.arrayBuffer();
+                    const bytes = new Uint8Array(buffer);
+                    let binary = '';
+                    for (let i = 0; i < bytes.length; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    const contentBase64 = btoa(binary);
+
+                    const body = {
+                        message: `Add ${rawPath} via BGecko Lab upload`,
+                        content: contentBase64,
+                        branch: PUBLIC_BRANCH
+                    };
+                    if (existingSha) body.sha = existingSha;
+
+                    const res = await fetch(
+                        `https://api.github.com/repos/${PUBLIC_OWNER}/${PUBLIC_REPO}/contents/${urlPath}`,
+                        {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/vnd.github+json'
+                            },
+                            body: JSON.stringify(body)
+                        }
+                    );
+
+                    if (!res.ok) {
+                        console.error('Upload failed:', res.status, await res.text());
+                        alert('Upload failed. Check console for details.');
+                        return;
+                    }
+
+                    alert('Upload successful.');
+                    await loadVaultFiles();  // refresh table
+                }
+
+                // ---------- WIRE UP FORM + INITIAL LOAD ----------
+                document.addEventListener('DOMContentLoaded', () => {
+                    const form = document.getElementById('vaultUploadForm');
+                    const input = document.getElementById('vaultUpload');
+
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const file = input.files[0];
+                        if (!file) {
+                            alert('Select a file first.');
+                            return;
+                        }
+                        await uploadFileToPublicData(file);
+                        input.value = '';
+                    });
+
+                    loadVaultFiles();
+                });
             </script>
 
 
+`````````````````````````````````````````````````````````````````````````````````````````````
             
 
             <img src="img/gecko_icon.png" alt="Gecko logo" class="footer-logo">
