@@ -104,54 +104,84 @@
             </div>
 
             
-            <!-- ── PDF Manager Section ── -->
+           <!-- ── PDF Manager Section (PUBLIC_DATA-backed) ── -->
             <div class="section" id="pdf-manager">
-                <h2>Research PDFs</h2>
-                <form id="pdfUploadForm">
-                    <input type="file" id="pdfUpload" accept=".pdf" />
-                    <button type="submit">Upload PDF</button>
-                </form>
+                <h2>Research PDFs</h2>
+                <p style="margin-top:-0.4rem; font-size:0.9rem;">
+                    Files served from the <code>PUBLIC_DATA</code> repository.
+                </p>
                 <table id="pdfTable">
                     <thead>
                         <tr><th>Filename</th><th>Download</th></tr>
                     </thead>
                     <tbody>
+                        
                         <!-- rows appended here -->
                     </tbody>
                 </table>
             </div>
             
             <script>
-                const form = document.getElementById('pdfUploadForm');
-                const input = document.getElementById('pdfUpload');
-                const tableBody = document.querySelector('#pdfTable tbody');
+                async function loadVaultPdfs() {
+                    const tableBody = document.querySelector('#pdfTable tbody');
+                    // Helper to show a single-row message
+                    function showMessage(msg) {
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.colSpan = 2;
+                        cell.textContent = msg;
+                        row.appendChild(cell);
+                        tableBody.appendChild(row);
+                    }
+                    
+                    try {
+                        // 1) Call GitHub API for PUBLIC_DATA repo root
+                        const res = await fetch(
+                            'https://api.github.com/repos/BGeckoResearch/PUBLIC_DATA/contents/'
+                        );
+                        
+                        if (!res.ok) {
+                            showMessage('Could not load PDFs from PUBLIC_DATA.');
+                            console.error('GitHub API error:', res.status, await res.text());
+                            return;
+                        }
+                        const items = await res.json();
+                        
+                        // 2) Filter for .pdf files (case-insensitive)
+                        const pdfs = items.filter(item =>
+                            item.type === 'file' &&
+                            item.name.toLowerCase().endsWith('.pdf')
+                                                 );
+                        
+                        if (!pdfs.length) {
+                            showMessage('No PDFs found in PUBLIC_DATA yet.');
+                            return;
+                        }
+                        
+                        // 3) Populate table
+                        pdfs.forEach(file => {
+                            const row = document.createElement('tr');
+                            const nameCell = document.createElement('td');
+                            nameCell.textContent = file.name;
+                            const linkCell = document.createElement('td');
+                            const a = document.createElement('a');
+                            a.href = file.download_url;   // direct download URL
+                            a.textContent = 'Download';
+                            a.target = '_blank';
+                            a.rel = 'noopener';
+                            linkCell.appendChild(a);
+                            row.appendChild(nameCell);
+                            row.appendChild(linkCell);
+                            tableBody.appendChild(row);
+                        });
+                    } catch (err) {
+                        console.error(err);
+                        showMessage('Error loading PDFs from PUBLIC_DATA.');
+                    }
+                }
                 
-                form.addEventListener('submit', e => {
-                    e.preventDefault();
-                    const file = input.files[0];
-                    if (!file) return;
-                    const row = document.createElement('tr');
-                    const nameCell = document.createElement('td');
-                    nameCell.textContent = file.name;
-                    const linkCell = document.createElement('td');
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(file);
-                    a.download = file.name;
-                    a.textContent = 'Download';
-                    linkCell.appendChild(a);
-                    row.appendChild(nameCell);
-                    row.appendChild(linkCell);
-                    tableBody.appendChild(row);
-                    form.reset();
-                });
+                document.addEventListener('DOMContentLoaded', loadVaultPdfs);
             </script>
-
-
-
-
-
-
-
 
 
             
