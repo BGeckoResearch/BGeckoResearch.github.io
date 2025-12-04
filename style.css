@@ -52,7 +52,7 @@ body {
 }
 
 
-body > *:not(#particles-js) {
+body > *:not(#particles-js) :not(.global-header) {
     position: relative;
     z-index: 1;
     padding-top: 40px;
