@@ -36,6 +36,21 @@ body {
     padding: 2rem;
 }
 
+.global-header {
+    background-color: #333;
+    color: #ffffff;
+    padding: 8px 16px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    text-align: right;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+
+}
+
 
 body > *:not(#particles-js) {
     position: relative;
