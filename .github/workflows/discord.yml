@@ -1,0 +1,24 @@
+name: Discord notify
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          REF: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          CONTENT="Repo: $REPO | Event: $EVENT | Actor: $ACTOR | Ref: $REF | SHA: ${SHA:0:7}"
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\":\"$CONTENT\"}" \
+            "$DISCORD_WEBHOOK"
