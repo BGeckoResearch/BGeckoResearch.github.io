@@ -37,13 +37,9 @@
     <datalist id="satelliteList"></datalist>
     <button onclick="trackSatellite()">Track</button>
   </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.1/dist/satellite.min.js"></script>
-  <script>
-    console.log("satellite global:", window.satellite);
-  </script>
 
-  <script>
+  <script type="module">
+    import * as satellite from "https://esm.sh/satellite.js@5.0.0";
     
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiYTAwZjcxOS0xZDY0LTRiNGUtOWU3OC01N2VlMzRmMTkyMWYiLCJpZCI6NDExNzM0LCJpYXQiOjE3NzQ5NDY3NzB9.d5omcPtppgFZlahZChqh1I6xWeReTJP81NQt1TMC5Qk";
     
@@ -55,11 +51,6 @@
     });
     
     let currentEntity = null;
-    
-    if (!window.satellite) {
-      alert("satellite.js failed to load.");
-      throw new Error("satellite.js failed to load.");
-    }
     
     async function fetchTLE(noradId) {
       const url = `https://celestrak.org/NORAD/elements/gp.php?CATNR=${encodeURIComponent(noradId)}&FORMAT=2LE`;
